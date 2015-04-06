@@ -76,10 +76,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ImageLoader.cpp" />
+    <ClCompile Include="SoundLoader.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SoundLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MultiThreaded Loader.rc" />

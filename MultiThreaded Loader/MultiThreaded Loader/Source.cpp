@@ -15,22 +15,20 @@
 
 //Library includes
 #include <windows.h>
-#include <windowsx.h>
+#include <vector>
+#include <thread>
 #include "resource.h"
-//#include <atlimage.h>
-//#include <afxwin.h>
+
+
+#include "ImageLoader.h"
+#include "SoundLoader.h"
+
 
 #define WIN32_LEAN_AND_MEAN
 #define WINDOW_CLASS_NAME L"MultiThreaded Loader"
 
-bool FileOpen(OPENFILENAME* _DestFileName, HWND _hwnd); 
-bool LoadBMPIntoDC(HDC hDC, LPCTSTR bmpfile);
-BOOL LoadBitmapFromBMPFile(LPTSTR szFileName, HBITMAP *phBitmap, HPALETTE *phPalette);
-
-
-HINSTANCE g_hInst;
-bool image = false;
-OPENFILENAME pFileNamePath;
+//bool FileOpen(OPENFILENAME* _DestFileName, HWND _hwnd); 
+//static void wat(unsigned int _iThreadID, std::vector<wchar_t*>* _vecSoundFilePaths, HDC _hDc);
 
 using namespace std;
 
@@ -46,10 +44,7 @@ using namespace std;
 LRESULT CALLBACK WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam, LPARAM _lParam)
 {
 	//OPENFILENAME pFileNamePath;
-	HANDLE hBmp;
-	//HBITMAP bmpExercising;
 	HDC hDC;
-	HDC MemDCExercising;
 	PAINTSTRUCT Ps;
 	
 	//Procces the given message
@@ -67,14 +62,25 @@ LRESULT CALLBACK WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam, LPARAM _lPa
 		break;
 		case ID_FILE_LOADIMAGE:
 		{
-			image = FileOpen(&pFileNamePath, _hWnd);
 			InvalidateRect(_hWnd, NULL, TRUE);
-			UpdateWindow(_hWnd);
+			hDC = BeginPaint(_hWnd, &Ps);
+			
+			CImageLoader& rImageLoader = CImageLoader::GetInstance();
+			rImageLoader.Load(_hWnd, hDC);
+			rImageLoader.DestroyInstance();
+			
+			EndPaint(_hWnd, &Ps);
+									
+			//SendMessage(_hWnd, WM_PAINT, _wParam, _lParam);
+			//InvalidateRect(_hWnd, NULL, TRUE);
+			//UpdateWindow(_hWnd);
 		}
 		break;
 		case ID_FILE_LOADSOUND:
 		{
-			GetOpenFileName(&pFileNamePath);
+			CSoundLoader& rSoundLoader = CSoundLoader::GetInstance();
+			rSoundLoader.Load(_hWnd);
+			rSoundLoader.DestroyInstance();
 		}
 		break;
 		}
@@ -83,36 +89,14 @@ LRESULT CALLBACK WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam, LPARAM _lPa
 	break;
 	case WM_PAINT:
 	{
-		
+		//hDC = BeginPaint(_hWnd, &Ps);
+		////vector<wchar_t*>* newone = vecImageFilePaths;
+		//CImageLoader& rImageLoader = CImageLoader::GetInstance();
+		//rImageLoader.ThreadCreate(hDC, vecImageFilePaths);
 
-		hDC = BeginPaint(_hWnd, &Ps);
+		//EndPaint(_hWnd, &Ps);
 
-		
-		if (image)
-		{
-		
-			//CImage Pic;
-			//Pic.Load(pFileNamePath.lpstrFile); // just change extension to load jpg
-			//CBitmap bitmap;
-			//bitmap.Attach(Pic.Detach());
-
-			// Load the bitmap from the resource
-			hBmp = LoadImage(g_hInst, pFileNamePath.lpstrFile, IMAGE_BITMAP , 0, 0, LR_LOADFROMFILE);
-				
-			// Create a memory device compatible with the above DC variable
-			MemDCExercising = CreateCompatibleDC(hDC);
-			// Select the new bitmap
-			SelectObject(MemDCExercising, hBmp);
-
-			// Copy the bits from the memory DC into the current dc
-			BitBlt(hDC, 10, 10, 450, 400, MemDCExercising, 0, 0, SRCCOPY);
-
-			// Restore the old bitmap
-			DeleteDC(MemDCExercising);
-			DeleteObject(hBmp);
-		}
-		EndPaint(_hWnd, &Ps);
-
+		return (0);
 	}
 	break;
 	case WM_CLOSE:
@@ -221,7 +205,7 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdl
 	//Clear out the event message for use
 	ZeroMemory(&msg, sizeof(MSG));
 
-	g_hInst = _hInstance;
+	//g_hInst = _hInstance;
 
 	//Create and register the window
 	HWND hWnd = CreateAndRegisterWindow(_hInstance, kiWidth, kiHeight, L"MultiThreaded Loader");
@@ -229,21 +213,7 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdl
 	// display the window on the screen
 	ShowWindow(hWnd, _iCmdshow);
 	
-	char szFile[MAX_PATH];
-
-	ZeroMemory(&pFileNamePath, sizeof(pFileNamePath));
-	pFileNamePath.lStructSize = sizeof(pFileNamePath);
-	pFileNamePath.hwndOwner = hWnd;
-	pFileNamePath.lpstrFile = (LPWSTR)szFile;
-	pFileNamePath.lpstrFile[0] = '\0';
-	pFileNamePath.nMaxFile = sizeof(szFile);
-	pFileNamePath.lpstrFilter = L"All\0*.*\0BMP\0*.bmp\0";
-	pFileNamePath.nFilterIndex = 1;
-	pFileNamePath.lpstrFileTitle = NULL;
-	pFileNamePath.nMaxFileTitle = 0;
-	pFileNamePath.lpstrInitialDir = NULL;
-	pFileNamePath.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
+	
 	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -270,105 +240,6 @@ bool FileOpen(OPENFILENAME* _DestFileName, HWND _hwnd)
 	}
 }
 
-bool LoadBMPIntoDC(HDC hDC, LPCTSTR bmpfile)
-{
-	// check if params are valid
-	if ((NULL == hDC) || (NULL == bmpfile))
-	{
-		MessageBox(0, L"Window Parm Invalid!", L"Error!", MB_ICONSTOP | MB_OK);
-		return FALSE;
-	}
-	// load bitmap into a bitmap handle
-	HANDLE hBmp = LoadImage(NULL, bmpfile, IMAGE_BITMAP, 0, 0,
-		LR_LOADFROMFILE);
 
-	if (NULL == hBmp)
-	{
-		MessageBox(0, L"Window Handler Invalid!", L"Error!", MB_ICONSTOP | MB_OK);
-		return FALSE;        // failed to load image
-	}
-	// bitmaps can only be selected into memory dcs:
-	HDC dcmem = CreateCompatibleDC(NULL);
 
-	// now select bitmap into the memory dc
-	if (NULL == SelectObject(dcmem, hBmp))
-	{	// failed to load bitmap into device context
-		DeleteDC(dcmem);
-		MessageBox(0, L"Window Load Failed!", L"Error!", MB_ICONSTOP | MB_OK);
-		return FALSE;
-	}
 
-	// now get the bmp size
-	BITMAP bm;
-	GetObject(hBmp, sizeof(bm), &bm);
-	// and blit it to the visible dc
-	if (BitBlt(hDC, 0, 0, bm.bmWidth, bm.bmHeight, dcmem,
-		0, 0, SRCCOPY) == 0)
-	{	// failed the blit
-		DeleteDC(dcmem);
-		MessageBox(0, L"Window Blit Failed!", L"Error!", MB_ICONSTOP | MB_OK);
-		return FALSE;
-	}
-
-	DeleteDC(dcmem);  // clear up the memory dc
-	return TRUE;
-}
-
-BOOL LoadBitmapFromBMPFile(LPTSTR szFileName, HBITMAP *phBitmap,HPALETTE *phPalette)
-{
-
-	BITMAP  bm;
-
-	*phBitmap = NULL;
-	*phPalette = NULL;
-
-	// Use LoadImage() to get the image loaded into a DIBSection
-	*phBitmap = (HBITMAP)LoadImage(NULL, szFileName, IMAGE_BITMAP, 0, 0,
-		LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	if (*phBitmap == NULL)
-		return FALSE;
-
-	// Get the color depth of the DIBSection
-	GetObject(*phBitmap, sizeof(BITMAP), &bm);
-	// If the DIBSection is 256 color or less, it has a color table
-	if ((bm.bmBitsPixel * bm.bmPlanes) <= 8)
-	{
-		HDC           hMemDC;
-		HBITMAP       hOldBitmap;
-		RGBQUAD       rgb[256];
-		LPLOGPALETTE  pLogPal;
-		WORD          i;
-
-		// Create a memory DC and select the DIBSection into it
-		hMemDC = CreateCompatibleDC(NULL);
-		hOldBitmap = (HBITMAP)SelectObject(hMemDC, *phBitmap);
-		// Get the DIBSection's color table
-		GetDIBColorTable(hMemDC, 0, 256, rgb);
-		// Create a palette from the color tabl
-		pLogPal = (LOGPALETTE *)malloc(sizeof(LOGPALETTE) + (256 * sizeof(PALETTEENTRY)));
-		pLogPal->palVersion = 0x300;
-		pLogPal->palNumEntries = 256;
-		for (i = 0; i<256; i++)
-		{
-			pLogPal->palPalEntry[i].peRed = rgb[i].rgbRed;
-			pLogPal->palPalEntry[i].peGreen = rgb[i].rgbGreen;
-			pLogPal->palPalEntry[i].peBlue = rgb[i].rgbBlue;
-			pLogPal->palPalEntry[i].peFlags = 0;
-		}
-		*phPalette = CreatePalette(pLogPal);
-		// Clean up
-		free(pLogPal);
-		SelectObject(hMemDC, hOldBitmap);
-		DeleteDC(hMemDC);
-	}
-	else   // It has no color table, so use a halftone palette
-	{
-		HDC    hRefDC;
-
-		hRefDC = GetDC(NULL);
-		*phPalette = CreateHalftonePalette(hRefDC);
-		ReleaseDC(NULL, hRefDC);
-	}
-	return TRUE;
-
-}
