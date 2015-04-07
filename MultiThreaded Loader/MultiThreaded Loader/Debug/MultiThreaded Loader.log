@@ -1,0 +1,38 @@
+﻿Build started 8/04/2015 10:25:07 a.m..
+     1>Project "H:\GitHub\MultiThreading-assignment\MultiThreaded Loader\MultiThreaded Loader\MultiThreaded Loader.vcxproj" on node 2 (Build target(s)).
+       Project file contains ToolsVersion="12.0". This toolset may be unknown or missing, in which case you may be able to resolve this by installing the appropriate version of MSBuild, or the build may have been forced to a particular ToolsVersion for policy reasons. Treating the project as if it had ToolsVersion="4.0". For more information, please see http://go.microsoft.com/fwlink/?LinkId=291333.
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt ImageLoader.cpp Source.cpp
+         ImageLoader.cpp
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_Vb_iterator<_Alloc> std::operator +(_Alloc::difference_type,std::_Vb_iterator<_Alloc>)' : could not deduce template argument for 'std::_Vb_iterator<_Alloc>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\vector(2204) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_Vb_const_iterator<_Alloc> std::operator +(_Alloc::difference_type,std::_Vb_const_iterator<_Alloc>)' : could not deduce template argument for 'std::_Vb_const_iterator<_Alloc>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\vector(2097) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_Vector_iterator<_Myvec> std::operator +(_Vector_iterator<_Myvec>::difference_type,std::_Vector_iterator<_Myvec>)' : could not deduce template argument for 'std::_Vector_iterator<_Myvec>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\vector(409) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_Vector_const_iterator<_Myvec> std::operator +(_Vector_const_iterator<_Myvec>::difference_type,std::_Vector_const_iterator<_Myvec>)' : could not deduce template argument for 'std::_Vector_const_iterator<_Myvec>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\vector(278) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_String_iterator<_Mystr> std::operator +(_String_iterator<_Mystr>::difference_type,std::_String_iterator<_Mystr>)' : could not deduce template argument for 'std::_String_iterator<_Mystr>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\xstring(420) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_String_const_iterator<_Mystr> std::operator +(_String_const_iterator<_Mystr>::difference_type,std::_String_const_iterator<_Mystr>)' : could not deduce template argument for 'std::_String_const_iterator<_Mystr>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\xstring(288) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::move_iterator<_RanIt> std::operator +(_Diff,const std::move_iterator<_RanIt> &)' : could not deduce template argument for 'const std::move_iterator<_RanIt> &' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\xutility(1947) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_Array_iterator<_Ty,_Size> std::operator +(_Array_iterator<_Ty,_Size>::difference_type,std::_Array_iterator<_Ty,_Size>)' : could not deduce template argument for 'std::_Array_iterator<_Ty,_Size>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\xutility(1801) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_Array_const_iterator<_Ty,_Size> std::operator +(_Array_const_iterator<_Ty,_Size>::difference_type,std::_Array_const_iterator<_Ty,_Size>)' : could not deduce template argument for 'std::_Array_const_iterator<_Ty,_Size>' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\xutility(1662) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::reverse_iterator<_RanIt> std::operator +(_Diff,const std::reverse_iterator<_RanIt> &)' : could not deduce template argument for 'const std::reverse_iterator<_RanIt> &' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\xutility(1226) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2784: 'std::_Revranit<_RanIt,_Base> std::operator +(_Diff,const std::_Revranit<_RanIt,_Base> &)' : could not deduce template argument for 'const std::_Revranit<_RanIt,_Base> &' from 'const wchar_t [2]'
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\xutility(1031) : see declaration of 'std::operator +'
+     1>h:\github\multithreading-assignment\multithreaded loader\multithreaded loader\imageloader.cpp(53): error C2676: binary '+' : 'std::wstring' does not define this operator or a conversion to a type acceptable to the predefined operator
+         Generating Code...
+         Compiling...
+         Source.cpp
+         Generating Code...
+     1>Done Building Project "H:\GitHub\MultiThreading-assignment\MultiThreaded Loader\MultiThreaded Loader\MultiThreaded Loader.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:03.76

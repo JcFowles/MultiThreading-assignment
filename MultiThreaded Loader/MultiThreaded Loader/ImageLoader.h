@@ -17,6 +17,7 @@
 #include <Windows.h>
 #include <vector>
 #include <thread>
+#include <string>
 
 using namespace std;
 class CImageLoader

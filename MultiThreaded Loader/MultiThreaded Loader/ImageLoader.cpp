@@ -49,7 +49,9 @@ void CImageLoader::ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _Im
 	//Concate the File path name with only one file using the vector of Image file paths(_ImageFilePath) 
 	//Remebering that the directory is the first element in _ImageFilePath
 	wstring strDirectory = _ImageFilePath[0];
+	//wstring strBackslash = L"\\";
 	wstring strFilePath = strDirectory + L"\\" + _ImageFilePath[_iThreadID];
+
 
 	//Load the bitmap from the choosen the file path
 	HANDLE hBmp = LoadImage(NULL, const_cast<LPWSTR>(strFilePath.c_str()), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -61,6 +63,8 @@ void CImageLoader::ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _Im
 
 	//Copy the bits from the memory DC into the current dc
 	BitBlt(_hDC, 10 + (100 * (_iThreadID - 1)), 10 + (100 * (_iThreadID - 1)), 1000, 1000, CompatibleMemDev, 0, 0, SRCCOPY);
+	StretchBlt(_hDC, 
+
 
 	//Restore the old bitmap
 	DeleteDC(CompatibleMemDev);
