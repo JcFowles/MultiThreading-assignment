@@ -1,3 +1,4 @@
+
 /*
 * Bachelor of Software Engineering
 * Media Design School
@@ -62,8 +63,8 @@ void CImageLoader::ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _Im
 	SelectObject(CompatibleMemDev, hBmp);
 
 	//Copy the bits from the memory DC into the current dc
-	BitBlt(_hDC, 10 + (100 * (_iThreadID - 1)), 10 + (100 * (_iThreadID - 1)), 1000, 1000, CompatibleMemDev, 0, 0, SRCCOPY);
-	StretchBlt(_hDC, 
+	//BitBlt(_hDC, 10 + (100 * (_iThreadID - 1)), 10 + (100 * (_iThreadID - 1)), 1000, 1000, CompatibleMemDev, 0, 0, SRCCOPY);
+	StretchBlt(_hDC, _iThreadID, 0, 
 
 
 	//Restore the old bitmap
