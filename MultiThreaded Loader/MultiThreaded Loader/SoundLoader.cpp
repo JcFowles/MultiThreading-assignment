@@ -25,6 +25,7 @@ CSoundLoader* CSoundLoader::s_pSoundLoader = 0;
 ********************/
 CSoundLoader::CSoundLoader()
 {
+
 }
 
 /***********************

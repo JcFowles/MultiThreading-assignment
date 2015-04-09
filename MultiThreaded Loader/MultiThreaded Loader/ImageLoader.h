@@ -18,6 +18,8 @@
 #include <vector>
 #include <thread>
 #include <string>
+#include <iostream>
+#include <algorithm>
 
 using namespace std;
 class CImageLoader
@@ -31,9 +33,6 @@ public:
 	static CImageLoader& GetInstance();
 	static void DestroyInstance();
 	
-	//void ThreadCreate(HDC _hDc, vector<wchar_t*>* _vecImageFilePaths);
-
-
 private:
 	//Disallowing copies and extra constructions
 	CImageLoader();
@@ -41,17 +40,13 @@ private:
 	CImageLoader& operator= (const CImageLoader& _kr);
 
 	// Private Prototypes
-	static void ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _vecImageFilePaths, HDC _hDC);
+	static void ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _vecImageFilePaths, HDC _hDC, int _iWidthImageCount);
 
 private:
 	// Singleton Instance
 	static CImageLoader* s_pImageLoader;
-	//vector<wchar_t*> vecImageFilePaths;
+	
 	// Member Variables
 	std::vector<std::thread> m_vecThreads;
-	//HWND m_Hwnd;
-
-	
-
 };
 

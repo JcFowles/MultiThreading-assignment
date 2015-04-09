@@ -36,6 +36,7 @@ CImageLoader::CImageLoader()
 ********************/
 CImageLoader::~CImageLoader()
 {
+
 }
 
 /***********************
@@ -45,28 +46,44 @@ CImageLoader::~CImageLoader()
 * @parameter: _ImageFilePath: Vector of Image File Paths
 * @return: void
 ********************/
-void CImageLoader::ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _ImageFilePath, HDC _hDC)
+void CImageLoader::ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _ImageFilePath, HDC _hDC, int _iWidthImageCount)
 {
 	//Concate the File path name with only one file using the vector of Image file paths(_ImageFilePath) 
 	//Remebering that the directory is the first element in _ImageFilePath
 	wstring strDirectory = _ImageFilePath[0];
-	//wstring strBackslash = L"\\";
 	wstring strFilePath = strDirectory + L"\\" + _ImageFilePath[_iThreadID];
-
 
 	//Load the bitmap from the choosen the file path
 	HANDLE hBmp = LoadImage(NULL, const_cast<LPWSTR>(strFilePath.c_str()), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 	//Create a memory device that is compatible with the past is DC variable
 	HDC CompatibleMemDev = CreateCompatibleDC(_hDC);
+	
 	//Select the new bitmap
 	SelectObject(CompatibleMemDev, hBmp);
 
-	//Copy the bits from the memory DC into the current dc
-	//BitBlt(_hDC, 10 + (100 * (_iThreadID - 1)), 10 + (100 * (_iThreadID - 1)), 1000, 1000, CompatibleMemDev, 0, 0, SRCCOPY);
-	StretchBlt(_hDC, _iThreadID, 0, 
+	BITMAP bmpImage;
+	GetObject(hBmp, sizeof(bmpImage), &bmpImage);
 
+	//Aspect ratio of the image
+	float fAspect = static_cast<float>(bmpImage.bmWidth) / static_cast<float>(bmpImage.bmHeight);
 
+	int iDestinationWidth, iDestinationHeight;
+
+	if (fAspect >= 1)
+	{
+		iDestinationWidth = 100;
+		iDestinationHeight = static_cast<int>(100 / fAspect);
+	}
+	else
+	{
+		iDestinationWidth = static_cast<int>(100 * fAspect);
+		iDestinationHeight = 100;
+	}
+
+	//Draw the image into the divice Context
+	StretchBlt(_hDC, (((_iThreadID - 1) % _iWidthImageCount)) * 100, ((_iThreadID - 1) / _iWidthImageCount) * 100, iDestinationWidth, iDestinationHeight, CompatibleMemDev, 0, 0, bmpImage.bmWidth, bmpImage.bmHeight, SRCCOPY);
+	
 	//Restore the old bitmap
 	DeleteDC(CompatibleMemDev);
 	DeleteObject(hBmp);
@@ -82,7 +99,7 @@ void CImageLoader::ThreadLoadImage(unsigned int _iThreadID, vector<wchar_t*> _Im
 void CImageLoader::Load(HWND _hWnd , HDC _hDC)
 {
 	OPENFILENAME ofnImageFile;			// File Explorer structure
-	char maxFileStringSize[1024];		// String Buffer to contain the file name(s)
+	char maxFileStringSize[10000];		// String Buffer to contain the file name(s)
 
 	// Initialize OPENFILENAME Structure
 	ZeroMemory(&ofnImageFile, sizeof(ofnImageFile));
@@ -91,7 +108,7 @@ void CImageLoader::Load(HWND _hWnd , HDC _hDC)
 	ofnImageFile.lpstrFile = (LPWSTR)maxFileStringSize;
 	ofnImageFile.lpstrFile[0] = '\0';
 	ofnImageFile.nMaxFile = sizeof(maxFileStringSize);
-	ofnImageFile.lpstrFilter = L"All\0*.*\0BMP\0*.bmp\0";
+	ofnImageFile.lpstrFilter = L"All\0*.*\0BMP\0*.BMP\0";
 	ofnImageFile.nFilterIndex = 1;
 	ofnImageFile.lpstrFileTitle = NULL;
 	ofnImageFile.nMaxFileTitle = 0;
@@ -118,13 +135,20 @@ void CImageLoader::Load(HWND _hWnd , HDC _hDC)
 			ptr += (lstrlenW(ptr) + 1);		//go to next file name
 		}
 
+		RECT recWindow;
+		GetWindowRect(_hWnd, &recWindow);
+
+		int iWndWidth = recWindow.right - recWindow.left;
+
+		int iWidthImageCount = iWndWidth / 100;
+
+		SetStretchBltMode(_hDC, HALFTONE);
 		//Create the threads and tell them to play sound
 		for (unsigned int iID = 1; iID < ImageFilePath.size(); iID++)
 		{
-			m_vecThreads.push_back(thread(ThreadLoadImage, iID, ImageFilePath, _hDC));
+			m_vecThreads.push_back(thread(ThreadLoadImage, iID, ImageFilePath, _hDC, iWidthImageCount));
 		}
-		
-		//change this
+
 		vector<thread>::iterator iterCurrent = m_vecThreads.begin();
 		vector<thread>::iterator iterEnd = m_vecThreads.end();
 		
@@ -134,30 +158,8 @@ void CImageLoader::Load(HWND _hWnd , HDC _hDC)
 			iterCurrent->join();
 			iterCurrent++;
 		}
-		
 	}
-	
 }
-
-//void CImageLoader::ThreadCreate(HDC _hDc, vector<wchar_t*>* _vecImageFilePaths)
-//{
-//	// Create Thread pool
-//	// Zero Index in SoundFilePaths contains the directory only
-//	for (unsigned int iID = 1; iID < _vecImageFilePaths->size(); iID++)
-//	{
-//		m_vecThreads.push_back(thread(ImageThread, iID, *_vecImageFilePaths, _hDc));
-//	}
-//
-//	vector<thread>::iterator iterCurrent = m_vecThreads.begin();
-//	vector<thread>::iterator iterEnd = m_vecThreads.end();
-//
-//	// Join all the threads
-//	while (iterCurrent != iterEnd)
-//	{
-//		iterCurrent->join();
-//		iterCurrent++;
-//	}
-//}
 
 /***********************
 * GetInstance: Returns the singleton instance of the SoundLoader, if it doesnt exist creates it.

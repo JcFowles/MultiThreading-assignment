@@ -19,16 +19,11 @@
 #include <thread>
 #include "resource.h"
 
-
 #include "ImageLoader.h"
 #include "SoundLoader.h"
 
-
 #define WIN32_LEAN_AND_MEAN
 #define WINDOW_CLASS_NAME L"MultiThreaded Loader"
-
-//bool FileOpen(OPENFILENAME* _DestFileName, HWND _hwnd); 
-//static void wat(unsigned int _iThreadID, std::vector<wchar_t*>* _vecSoundFilePaths, HDC _hDc);
 
 using namespace std;
 
@@ -43,7 +38,6 @@ using namespace std;
 ********************/
 LRESULT CALLBACK WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam, LPARAM _lParam)
 {
-	//OPENFILENAME pFileNamePath;
 	HDC hDC;
 	PAINTSTRUCT Ps;
 	
@@ -51,66 +45,61 @@ LRESULT CALLBACK WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam, LPARAM _lPa
 	switch (_uiMsg)
 	{
 		
-	case WM_COMMAND:
-	{
-		switch (LOWORD(_wParam))
+		case WM_COMMAND:
 		{
-		case ID_EXIT:	//Close the application
+			switch (LOWORD(_wParam))
+			{
+				case ID_EXIT:	//Close the application
+				{
+					DestroyWindow(_hWnd);
+				}
+				break;
+				case ID_FILE_LOADIMAGE:
+				{
+					InvalidateRect(_hWnd, NULL, TRUE);
+					hDC = BeginPaint(_hWnd, &Ps);
+			
+					CImageLoader& rImageLoader = CImageLoader::GetInstance();
+					rImageLoader.Load(_hWnd, hDC);
+					rImageLoader.DestroyInstance();
+			
+					EndPaint(_hWnd, &Ps);
+									
+				}
+				break;
+				case ID_FILE_LOADSOUND:
+				{
+					CSoundLoader& rSoundLoader = CSoundLoader::GetInstance();
+					rSoundLoader.Load(_hWnd);
+					rSoundLoader.DestroyInstance();
+				}
+				break;
+			}
+		
+		}
+		break;
+		case WM_PAINT:
+		{
+			return (0);
+		}
+		break;
+		case WM_CREATE:
+		{
+			return 0;
+		}
+		break;
+		case WM_CLOSE:
 		{
 			DestroyWindow(_hWnd);
 		}
 		break;
-		case ID_FILE_LOADIMAGE:
+		//Closing the window
+		case WM_DESTROY:
 		{
-			InvalidateRect(_hWnd, NULL, TRUE);
-			hDC = BeginPaint(_hWnd, &Ps);
-			
-			CImageLoader& rImageLoader = CImageLoader::GetInstance();
-			rImageLoader.Load(_hWnd, hDC);
-			rImageLoader.DestroyInstance();
-			
-			EndPaint(_hWnd, &Ps);
-									
-			//SendMessage(_hWnd, WM_PAINT, _wParam, _lParam);
-			//InvalidateRect(_hWnd, NULL, TRUE);
-			//UpdateWindow(_hWnd);
-		}
-		break;
-		case ID_FILE_LOADSOUND:
-		{
-			CSoundLoader& rSoundLoader = CSoundLoader::GetInstance();
-			rSoundLoader.Load(_hWnd);
-			rSoundLoader.DestroyInstance();
-		}
-		break;
-		}
-		
-	}
-	break;
-	case WM_PAINT:
-	{
-		//hDC = BeginPaint(_hWnd, &Ps);
-		////vector<wchar_t*>* newone = vecImageFilePaths;
-		//CImageLoader& rImageLoader = CImageLoader::GetInstance();
-		//rImageLoader.ThreadCreate(hDC, vecImageFilePaths);
-
-		//EndPaint(_hWnd, &Ps);
-
-		return (0);
-	}
-	break;
-	case WM_CLOSE:
-	{
-		DestroyWindow(_hWnd);
-	}
-	break;
-	//Closing the window
-	case WM_DESTROY:
-	{
-		//Send message to close the entire application
-		PostQuitMessage(0);
-		return 0;
-	} break;
+			//Send message to close the entire application
+			PostQuitMessage(0);
+			return 0;
+		} break;
 		
 	}
 	
@@ -136,18 +125,18 @@ HWND CreateAndRegisterWindow(HINSTANCE _hInstance, int _iWidth, int _iHeight, LP
 
 	//Fill in the struct with the needed information
 	winclass.cbSize = sizeof(WNDCLASSEX);
-	winclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	winclass.style = CS_OWNDC ;
 	winclass.lpfnWndProc = WindowProc;
 	winclass.cbClsExtra = 0;
 	winclass.cbWndExtra = 0;
 	winclass.hInstance = _hInstance;
 	winclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	winclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	winclass.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	winclass.hbrBackground = static_cast<HBRUSH>(GetStockObject(R2_WHITE));
 	winclass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
 	winclass.lpszClassName = WINDOW_CLASS_NAME;
 	winclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-
+	
 	//Register the window class
 	if (!RegisterClassEx(&winclass))
 	{
@@ -158,18 +147,20 @@ HWND CreateAndRegisterWindow(HINSTANCE _hInstance, int _iWidth, int _iHeight, LP
 	//Create the window and return the result as the handle
 	HWND hWnd;
 
+	HMENU hMenu = LoadMenu(_hInstance, MAKEINTRESOURCE(IDR_MENU1));
+
 	//Non-Full Screen
-	hWnd = CreateWindowEx(NULL,								// Extend style.
-		WINDOW_CLASS_NAME,									// Class.		
-		_pcTitle,											// Title.
-		WS_OVERLAPPEDWINDOW | WS_BORDER | WS_CAPTION |
-		WS_SYSMENU | WS_VISIBLE,							//Window stlye
-		CW_USEDEFAULT, CW_USEDEFAULT,						// Initial x,y.
-		_iWidth, _iHeight,									// Initial width, height.
-		NULL,												// Handle to parent.
-		NULL,												// Handle to menu.
-		_hInstance,											// Instance of this application.
-		NULL);												// Extra creation parameters.
+	hWnd =	CreateWindowEx(NULL,								// Extend style.
+			WINDOW_CLASS_NAME,									// Class.		
+			_pcTitle,											// Title.
+			WS_SYSMENU | WS_VISIBLE |
+			WS_OVERLAPPEDWINDOW  ,										//Window stlye
+			0, 0,												// Initial x,y.
+			_iWidth, _iHeight,									// Initial width, height.
+			NULL,												// Handle to parent.
+			hMenu,												// Handle to menu.
+			_hInstance,											// Instance of this application.
+			NULL);												// Extra creation parameters.
 
 		
 
@@ -196,24 +187,23 @@ HWND CreateAndRegisterWindow(HINSTANCE _hInstance, int _iWidth, int _iHeight, LP
 int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdline, int _iCmdshow)
 {
 	//Screen Resolution
-	const int kiWidth = 500;
-	const int kiHeight = 400;
+	const int kiWidth = 1015;
+	const int kiHeight = 815;
 
 	//This holds Windows event messages
 	MSG msg;
-
+	
 	//Clear out the event message for use
 	ZeroMemory(&msg, sizeof(MSG));
-
+	
 	//g_hInst = _hInstance;
-
+	
 	//Create and register the window
 	HWND hWnd = CreateAndRegisterWindow(_hInstance, kiWidth, kiHeight, L"MultiThreaded Loader");
-
+	
 	// display the window on the screen
-	ShowWindow(hWnd, _iCmdshow);
-	
-	
+	//ShowWindow(hWnd, _iCmdshow);
+		
 	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -221,25 +211,12 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdl
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		
+			
 	}
-
+	
 	// return this part of the WM_QUIT message to Windows
 	return msg.wParam;
 }
 
-bool FileOpen(OPENFILENAME* _DestFileName, HWND _hwnd)
-{
-	if (GetOpenFileName(_DestFileName) == TRUE)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
 
-
-
-
+	
